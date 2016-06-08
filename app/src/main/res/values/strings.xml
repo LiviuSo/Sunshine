@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Sunshine</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="forecast_placeholder">Today - Sunny - 88 / 63</string>
+    <string name="refresh">Refresh</string>
+    <string name="settings">Settings</string>
+</resources>
