@@ -100,11 +100,15 @@ public class ForecastFragment extends Fragment {
      * Updates the list with the forecasts for the current location
      */
     private void updateWeather() {
-        // fetch the location preference
+        // fetch the location from preferences
         String zip = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        // fetch the unit from preferences
+        String unit = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                .getString(getString(R.string.pref_unit_key), getString(R.string.pref_unit_metric));
+
         FetchWeatherTask task = new FetchWeatherTask();
-        task.execute(zip);
+        task.execute(zip, unit);
     }
 
     private String getReadableDateString(long time) {
@@ -209,6 +213,8 @@ public class ForecastFragment extends Fragment {
         @Override
         protected String[] doInBackground(String... params) {
             String zipCode = params[0];
+            String unit = params[1];
+
             // b/e
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -230,7 +236,7 @@ public class ForecastFragment extends Fragment {
                         .encodedPath("http://api.openweathermap.org/data/2.5/forecast/daily")
                         .appendQueryParameter(QP_MODE, "json")
                         .appendQueryParameter(QP_ZIP, zipCode)
-                        .appendQueryParameter(QP_UNITS, "metric")
+                        .appendQueryParameter(QP_UNITS, unit)
                         .appendQueryParameter(QP_NDAYS, "7")
                         .appendQueryParameter(QP_APPID, MyOpenWeatherMapApiKey)
                         .build(); // build the URI
