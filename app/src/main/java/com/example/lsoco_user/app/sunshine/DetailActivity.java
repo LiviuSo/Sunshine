@@ -41,6 +41,8 @@ public class DetailActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -60,9 +62,9 @@ public class DetailActivity extends AppCompatActivity {
                                  Bundle savedInstanceState) {
 
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-            TextView textView = (TextView)rootView.findViewById(R.id.text_details);
+            TextView textView = (TextView) rootView.findViewById(R.id.text_details);
             Intent intent = getActivity().getIntent();
-            if(intent != null) {
+            if (intent != null) {
                 textView.setText(intent.getStringExtra(Intent.EXTRA_TEXT));
             }
             return rootView;
