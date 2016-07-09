@@ -16,6 +16,7 @@
     <string name="pref_unit_metric" translatable="false">metric</string>
     <string name="pref_unit_imperial" translatable="false">imperial</string>
     <string name="map">Map</string>
+    <string name="share">Share</string>
 
 
 </resources>
