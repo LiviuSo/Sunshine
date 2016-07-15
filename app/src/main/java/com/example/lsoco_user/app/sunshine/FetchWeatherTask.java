@@ -13,6 +13,7 @@ package com.example.lsoco_user.app.sunshine;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -41,10 +42,11 @@ import java.util.Vector;
 
 public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
-    private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+    private final String MyOpenWeatherMapApiKey = "7037c45f7f1708b7dc8c9fd1d2b3d83f";
+    private final String LOG_TAG                = FetchWeatherTask.class.getSimpleName();
 
-    private ArrayAdapter<String> mForecastAdapter;
-    private final Context mContext;
+    private       ArrayAdapter<String> mForecastAdapter;
+    private final Context              mContext;
 
     public FetchWeatherTask(Context context, ArrayAdapter<String> forecastAdapter) {
         mContext = context;
@@ -56,7 +58,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     /* The date/time conversion code is going to be moved outside the asynctask later,
      * so for convenience we're breaking it out into its own method now.
      */
-    private String getReadableDateString(long time){
+    private String getReadableDateString(long time) {
         // Because the API returns a unix timestamp (measured in seconds),
         // it must be converted to milliseconds in order to be converted to valid date.
         Date date = new Date(time);
@@ -98,9 +100,9 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      * Helper method to handle insertion of a new location in the weather database.
      *
      * @param locationSetting The location string used to request updates from the server.
-     * @param cityName A human-readable city name, e.g "Mountain View"
-     * @param lat the latitude of the city
-     * @param lon the longitude of the city
+     * @param cityName        A human-readable city name, e.g "Mountain View"
+     * @param lat             the latitude of the city
+     * @param lon             the longitude of the city
      * @return the row ID of the added location.
      */
     long addLocation(String locationSetting, String cityName, double lat, double lon) {
@@ -118,7 +120,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     String[] convertContentValuesToUXFormat(Vector<ContentValues> cvv) {
         // return strings to keep UI functional for now
         String[] resultStrs = new String[cvv.size()];
-        for ( int i = 0; i < cvv.size(); i++ ) {
+        for (int i = 0; i < cvv.size(); i++) {
             ContentValues weatherValues = cvv.elementAt(i);
             String highAndLow = formatHighLows(
                     weatherValues.getAsDouble(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP),
@@ -207,7 +209,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             // now we work exclusively in UTC
             dayTime = new Time();
 
-            for(int i = 0; i < weatherArray.length(); i++) {
+            for (int i = 0; i < weatherArray.length(); i++) {
                 // These are the values that will be collected.
                 long dateTime;
                 double pressure;
@@ -225,7 +227,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 JSONObject dayForecast = weatherArray.getJSONObject(i);
 
                 // Cheating to convert this to UTC time, which is what we want anyhow
-                dateTime = dayTime.setJulianDay(julianStartDay+i);
+                dateTime = dayTime.setJulianDay(julianStartDay + i);
 
                 pressure = dayForecast.getDouble(OWM_PRESSURE);
                 humidity = dayForecast.getInt(OWM_HUMIDITY);
@@ -262,7 +264,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             }
 
             // add to database
-            if ( cVVector.size() > 0 ) {
+            if (cVVector.size() > 0) {
                 // Student: call bulkInsert to add the weatherEntries to the database here
             }
 
@@ -328,12 +330,14 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             final String FORMAT_PARAM = "mode";
             final String UNITS_PARAM = "units";
             final String DAYS_PARAM = "cnt";
+            final String QP_APPID = "appid";
 
             Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                     .appendQueryParameter(QUERY_PARAM, params[0])
                     .appendQueryParameter(FORMAT_PARAM, format)
                     .appendQueryParameter(UNITS_PARAM, units)
                     .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                    .appendQueryParameter(QP_APPID, MyOpenWeatherMapApiKey)
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -397,7 +401,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     protected void onPostExecute(String[] result) {
         if (result != null && mForecastAdapter != null) {
             mForecastAdapter.clear();
-            for(String dayForecastStr : result) {
+            for (String dayForecastStr : result) {
                 mForecastAdapter.add(dayForecastStr);
             }
             // New data is back from the server.  Hooray!

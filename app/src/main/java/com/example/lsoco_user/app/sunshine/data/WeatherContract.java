@@ -25,6 +25,7 @@ import android.text.format.Time;
  * Defines table and column names for the weather database.
  */
 public class WeatherContract {
+
     // The "Content authority" is a name for the entire content provider, similar to the
     // relationship between a domain name and its website.  A convenient string to use for the
     // content authority is the package name for the app, which is guaranteed to be unique on the
@@ -40,8 +41,9 @@ public class WeatherContract {
     // looking at weather data. content://com.example.android.sunshine.app/givemeroot/ will fail,
     // as the ContentProvider hasn't been given any information on what to do with "givemeroot".
     // At least, let's hope not.  Don't be that dev, reader.  Don't be that dev.
-    public static final String PATH_WEATHER = "weather";
+    public static final String PATH_WEATHER  = "weather";
     public static final String PATH_LOCATION = "location";
+
     // To make it easy to query for the exact date, we normalize all dates that go into
     // the database to the start of the the Julian day at UTC.
     public static long normalizeDate(long startDate) {
@@ -58,16 +60,16 @@ public class WeatherContract {
         done for WeatherEntry)
      */
     public static final class LocationEntry implements BaseColumns {
-        public static final String TABLE_NAME = "location";
 
-        public static final String COLUMN_CITY_NAME = "city_name";
-        public static final String COLUMN_COORD_LAT = "coord_lat";
-        public static final String COLUMN_COORD_LONG = "coord_long";
+        public static final String TABLE_NAME              = "location";
+        public static final String COLUMN_CITY_NAME        = "city_name";
+        public static final String COLUMN_COORD_LAT        = "coord_lat";
+        public static final String COLUMN_COORD_LONG       = "coord_long";
         public static final String COLUMN_LOCATION_SETTING = "location_setting";
-        public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION).build();
 
-        public static final String CONTENT_TYPE =
+        public static final Uri    CONTENT_URI       =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_LOCATION).build();
+        public static final String CONTENT_TYPE      =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_LOCATION;
@@ -83,9 +85,9 @@ public class WeatherContract {
         public static final String TABLE_NAME = "weather";
 
         // Column with the foreign key into the location table.
-        public static final String COLUMN_LOC_KEY = "location_id";
+        public static final String COLUMN_LOC_KEY    = "location_id";
         // Date, stored as long in milliseconds since the epoch
-        public static final String COLUMN_DATE = "date";
+        public static final String COLUMN_DATE       = "date";
         // Weather id as returned by API, to identify the icon to be used
         public static final String COLUMN_WEATHER_ID = "weather_id";
 
@@ -109,14 +111,12 @@ public class WeatherContract {
         // Degrees are meteorological degrees (e.g, 0 is north, 180 is south).  Stored as floats.
         public static final String COLUMN_DEGREES = "degrees";
 
-        public static final Uri CONTENT_URI =
+        public static final Uri    CONTENT_URI       =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_WEATHER).build();
-
-        public static final String CONTENT_TYPE =
+        public static final String CONTENT_TYPE      =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_WEATHER;
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_WEATHER;
-
 
         public static Uri buildWeatherUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
@@ -126,19 +126,23 @@ public class WeatherContract {
             Student: Fill in this buildWeatherLocation function
          */
         public static Uri buildWeatherLocation(String locationSetting) {
-            return null;
+            return CONTENT_URI.buildUpon()
+                    .appendPath(locationSetting)
+                    .build();
         }
 
-        public static Uri buildWeatherLocationWithStartDate(
-                String locationSetting, long startDate) {
+        public static Uri buildWeatherLocationWithStartDate(String locationSetting, long startDate) {
             long normalizedDate = normalizeDate(startDate);
-            return CONTENT_URI.buildUpon().appendPath(locationSetting)
-                    .appendQueryParameter(COLUMN_DATE, Long.toString(normalizedDate)).build();
+            return CONTENT_URI.buildUpon()
+                    .appendPath(locationSetting)
+                    .appendQueryParameter(COLUMN_DATE, Long.toString(normalizedDate))
+                    .build();
         }
 
         public static Uri buildWeatherLocationWithDate(String locationSetting, long date) {
             return CONTENT_URI.buildUpon().appendPath(locationSetting)
-                    .appendPath(Long.toString(normalizeDate(date))).build();
+                    .appendPath(Long.toString(normalizeDate(date)))
+                    .build();
         }
 
         public static String getLocationSettingFromUri(Uri uri) {

@@ -38,6 +38,9 @@
                 android:value=".MainActivity"/>
         </activity>
 
+        <provider
+            android:authorities="com.example.android.sunshine.app"
+            android:name="com.example.lsoco_user.app.sunshine.data.WeatherProvider"/>
     </application>
 
 </manifest>

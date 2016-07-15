@@ -107,7 +107,7 @@ public class ForecastFragment extends Fragment {
         String unit = PreferenceManager.getDefaultSharedPreferences(getActivity())
                 .getString(getString(R.string.pref_unit_key), getString(R.string.pref_unit_metric));
 
-        FetchWeatherTask task = new FetchWeatherTask();
+        FetchWeatherTask task = new FetchWeatherTask(getActivity(), mForecastAdapter);
         task.execute(zip, unit);
     }
 
@@ -205,103 +205,103 @@ public class ForecastFragment extends Fragment {
     /**
      * AsyncTask for downloading weather feed
      */
-    private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
-
-        private final String MyOpenWeatherMapApiKey = "7037c45f7f1708b7dc8c9fd1d2b3d83f";
-        private final String LOG_TAG                = FetchWeatherTask.class.getSimpleName();
-
-        @Override
-        protected String[] doInBackground(String... params) {
-            String zipCode = params[0];
-            String unit = params[1];
-
-            // b/e
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            // Will contain the raw JSON response as a string.
-            String forecastJsonStr = null;
-
-            try {
-                // Construct the URL for the OpenWeatherMap query
-                // Possible parameters are available at OWM's forecast API page, at
-                // http://openweathermap.org/API#forecast
-                // using UriBuilder
-                final String QP_MODE = "mode";
-                final String QP_ZIP = "zip";
-                final String QP_UNITS = "units";
-                final String QP_NDAYS = "cnt";
-                final String QP_APPID = "appid";
-                Uri uri = new Uri.Builder()
-                        .encodedPath("http://api.openweathermap.org/data/2.5/forecast/daily")
-                        .appendQueryParameter(QP_MODE, "json")
-                        .appendQueryParameter(QP_ZIP, zipCode)
-                        .appendQueryParameter(QP_UNITS, unit)
-                        .appendQueryParameter(QP_NDAYS, "7")
-                        .appendQueryParameter(QP_APPID, MyOpenWeatherMapApiKey)
-                        .build(); // build the URI
-                URL url = new URL(uri.toString()); // create the URL
-                Log.d(LOG_TAG, url.toString());
-
-                // Create the request to OpenWeatherMap, and open the connection
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                // Read the input stream into a String
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    // Nothing to do.
-                    return null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line).append('\n');
-                }
-
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    return null;
-                }
-                forecastJsonStr = buffer.toString();
-                Log.d(LOG_TAG, forecastJsonStr); // success
-                return getWeatherDataFromJson(forecastJsonStr, numDays);
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-                // If the code didn't successfully get the weather data, there's no point in attemping
-                // to parse it.
-                return null;
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String[] strings) {
-            mWeekForecast.clear();
-            for (int i=0; i<strings.length; i++) {
-                mWeekForecast.add(i, strings[i]);
-            }
-            mForecastAdapter.notifyDataSetChanged();
-        }
-    }
+//    private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
+//
+//        private final String MyOpenWeatherMapApiKey = "7037c45f7f1708b7dc8c9fd1d2b3d83f";
+//        private final String LOG_TAG                = FetchWeatherTask.class.getSimpleName();
+//
+//        @Override
+//        protected String[] doInBackground(String... params) {
+//            String zipCode = params[0];
+//            String unit = params[1];
+//
+//            // b/e
+//            HttpURLConnection urlConnection = null;
+//            BufferedReader reader = null;
+//
+//            // Will contain the raw JSON response as a string.
+//            String forecastJsonStr = null;
+//
+//            try {
+//                // Construct the URL for the OpenWeatherMap query
+//                // Possible parameters are available at OWM's forecast API page, at
+//                // http://openweathermap.org/API#forecast
+//                // using UriBuilder
+//                final String QP_MODE = "mode";
+//                final String QP_ZIP = "zip";
+//                final String QP_UNITS = "units";
+//                final String QP_NDAYS = "cnt";
+//                final String QP_APPID = "appid";
+//                Uri uri = new Uri.Builder()
+//                        .encodedPath("http://api.openweathermap.org/data/2.5/forecast/daily")
+//                        .appendQueryParameter(QP_MODE, "json")
+//                        .appendQueryParameter(QP_ZIP, zipCode)
+//                        .appendQueryParameter(QP_UNITS, unit)
+//                        .appendQueryParameter(QP_NDAYS, "7")
+//                        .appendQueryParameter(QP_APPID, MyOpenWeatherMapApiKey)
+//                        .build(); // build the URI
+//                URL url = new URL(uri.toString()); // create the URL
+//                Log.d(LOG_TAG, url.toString());
+//
+//                // Create the request to OpenWeatherMap, and open the connection
+//                urlConnection = (HttpURLConnection) url.openConnection();
+//                urlConnection.setRequestMethod("GET");
+//                urlConnection.connect();
+//
+//                // Read the input stream into a String
+//                InputStream inputStream = urlConnection.getInputStream();
+//                StringBuffer buffer = new StringBuffer();
+//                if (inputStream == null) {
+//                    // Nothing to do.
+//                    return null;
+//                }
+//                reader = new BufferedReader(new InputStreamReader(inputStream));
+//
+//                String line;
+//                while ((line = reader.readLine()) != null) {
+//                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+//                    // But it does make debugging a *lot* easier if you print out the completed
+//                    // buffer for debugging.
+//                    buffer.append(line).append('\n');
+//                }
+//
+//                if (buffer.length() == 0) {
+//                    // Stream was empty.  No point in parsing.
+//                    return null;
+//                }
+//                forecastJsonStr = buffer.toString();
+//                Log.d(LOG_TAG, forecastJsonStr); // success
+//                return getWeatherDataFromJson(forecastJsonStr, numDays);
+//            } catch (IOException e) {
+//                Log.e(LOG_TAG, "Error ", e);
+//                // If the code didn't successfully get the weather data, there's no point in attemping
+//                // to parse it.
+//                return null;
+//            } catch (JSONException e) {
+//                Log.e(LOG_TAG, e.getMessage(), e);
+//            } finally {
+//                if (urlConnection != null) {
+//                    urlConnection.disconnect();
+//                }
+//                if (reader != null) {
+//                    try {
+//                        reader.close();
+//                    } catch (final IOException e) {
+//                        Log.e(LOG_TAG, "Error closing stream", e);
+//                    }
+//                }
+//            }
+//
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String[] strings) {
+//            mWeekForecast.clear();
+//            for (int i=0; i<strings.length; i++) {
+//                mWeekForecast.add(i, strings[i]);
+//            }
+//            mForecastAdapter.notifyDataSetChanged();
+//        }
+//    }
 }
