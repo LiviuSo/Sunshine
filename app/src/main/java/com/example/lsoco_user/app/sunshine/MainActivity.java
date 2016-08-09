@@ -20,15 +20,32 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private String mLocation;
+    private final String FORECASTFRAGMENT_TAG = "frag_tag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mLocation = Utility.getPreferredLocation(this);
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment())
+                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
                     .commit();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String location = Utility.getPreferredLocation(this);
+        if (location != null && !location.equals(mLocation)) {
+            ForecastFragment ff = (ForecastFragment) getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
+            if(ff != null) {
+                ff.onLocationChanged();
+            }
+            mLocation = location;
         }
     }
 
@@ -41,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.action_settings:
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
@@ -59,48 +76,16 @@ public class MainActivity extends AppCompatActivity {
         // get the zip code from preferences
         String zip = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
-        // convert the zip code into geo coords (my solution)
-//        Address address = getAddressFromZip(zip);
-//        if(address != null) {
-//            String uriString = String.format(Locale.getDefault(), "geo:%f,%f", address.getLatitude(), address.getLongitude());
-//            Uri uri = Uri.parse(uriString);
-//
-//            Intent intent = new Intent(Intent.ACTION_VIEW);
-//            intent.setData(uri);
-//            // test if any app can handle the intent & show the location
-//            if(intent.resolveActivity(getPackageManager()) != null) {
-//                startActivity(intent);
-//            } else {
-//                Log.e(LOG_TAG, "No activity to show the map");
-//            }
-//        } else {
-//            // Display appropriate message when Geocoder services are not available
-//            Toast.makeText(this, "Unable to geocode zipcode", Toast.LENGTH_LONG).show();
-//        }
         Uri uri = Uri.parse("geo:0,0").buildUpon()
                 .appendQueryParameter("q", zip)
                 .build();
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(uri);
         // test if any app can handle the intent & show the location
-        if(intent.resolveActivity(getPackageManager()) != null) {
+        if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         } else {
             Log.e(LOG_TAG, "No activity to show the map");
         }
     }
-
-//    private Address getAddressFromZip(String zip) {
-//        final Geocoder geocoder = new Geocoder(this);
-//        try {
-//            List<Address> addresses = geocoder.getFromLocationName(zip, 1);
-//            if (addresses != null && !addresses.isEmpty()) {
-//                return addresses.get(0);
-//            }
-//        } catch (IOException e) {
-//            // handle exception
-//            Log.e(LOG_TAG, e.getMessage(), e);
-//        }
-//        return null;
-//    }
 }
