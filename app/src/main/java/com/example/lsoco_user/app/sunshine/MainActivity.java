@@ -1,10 +1,13 @@
 package com.example.lsoco_user.app.sunshine;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,23 +20,39 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements ForecastFragment.Callback {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private final String DETAILFRAGMENT_TAG = "DFTAG";
     private String mLocation;
-    private final String FORECASTFRAGMENT_TAG = "frag_tag";
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         mLocation = Utility.getPreferredLocation(this);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
-                    .commit();
+        setContentView(R.layout.activity_main);
+        if (findViewById(R.id.weather_detail_container) != null) {
+            // The detail container view will be present only in the large-screen layouts
+            // (res/layout-sw600dp). If this view is present, then the activity should be
+            // in two-pane mode.
+            mTwoPane = true;
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            if (savedInstanceState == null) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .add(R.id.weather_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
         }
+        ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+        ff.setUseSpecialTodayLayout(!mTwoPane);
     }
 
     @Override
@@ -41,9 +60,16 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         String location = Utility.getPreferredLocation(this);
         if (location != null && !location.equals(mLocation)) {
-            ForecastFragment ff = (ForecastFragment) getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
+            ForecastFragment ff = (ForecastFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.fragment_forecast);
             if(ff != null) {
                 ff.onLocationChanged();
+            }
+
+            DetailFragment df = (DetailFragment) getSupportFragmentManager()
+                    .findFragmentByTag(DETAILFRAGMENT_TAG);
+            if(df != null) {
+                df.onLocationChanged(location);
             }
             mLocation = location;
         }
@@ -86,6 +112,22 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         } else {
             Log.e(LOG_TAG, "No activity to show the map");
+        }
+    }
+
+    @Override
+    public void onItemSelected(Uri dateUri) {
+        if(mTwoPane) {
+            DetailFragment detailFrag = new DetailFragment();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(DetailFragment.DETAIL_URI, dateUri);
+            detailFrag.setArguments(bundle);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, detailFrag, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else { // if on phone, start
+            Intent intent = new Intent(this, DetailActivity.class).setData(dateUri);
+            startActivity(intent);
         }
     }
 }

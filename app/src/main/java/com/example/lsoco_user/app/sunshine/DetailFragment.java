@@ -3,6 +3,7 @@ package com.example.lsoco_user.app.sunshine;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -30,9 +31,10 @@ import java.util.Locale;
  */
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private final int    DETAIL_LOADER          = 0;
-    private final String LOG_TAG                = DetailFragment.class.getSimpleName();
-    private final String FORECAST_SHARE_HASHTAG = " #unshineApp";
+    public static final String DETAIL_URI             = "dataUri";
+    private final       int    DETAIL_LOADER          = 0;
+    private final       String LOG_TAG                = DetailFragment.class.getSimpleName();
+    private final       String FORECAST_SHARE_HASHTAG = " #unshineApp";
     private String              mForecast;
     private ShareActionProvider mShareActionProvider;
     private static final String[] FORECAST_COLUMNS = {
@@ -61,6 +63,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int COL_WEATHER_PRESS    = 8;
     private static final int COL_WEATHER_COND_ID  = 9;
 
+    private TextView  tvDay;
     private TextView  tvDate;
     private TextView  tvMax;
     private TextView  tvMin;
@@ -69,6 +72,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView  tvPress;
     private TextView  tvWind;
     private ImageView ivIcon;
+    private Uri       mUri; // the uri passed as arg to this fragment
 
     public DetailFragment() {
         setHasOptionsMenu(true);
@@ -78,14 +82,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
-        tvDate = (TextView) view.findViewById(R.id.details_date);
-        tvDescr = (TextView) view.findViewById(R.id.details_forecast);
-        tvHumidity = (TextView) view.findViewById(R.id.details_humidity);
-        tvMax = (TextView) view.findViewById(R.id.details_high);
-        tvMin = (TextView) view.findViewById(R.id.details_low);
-        tvPress = (TextView) view.findViewById(R.id.details_pressure);
-        tvWind = (TextView) view.findViewById(R.id.details_wind);
-        ivIcon = (ImageView) view.findViewById(R.id.details_icon);
+
+        tvDay = (TextView) view.findViewById(R.id.detail_day_textview);
+        tvDate = (TextView) view.findViewById(R.id.detail_date_textview);
+        tvDescr = (TextView) view.findViewById(R.id.detail_forecast_textview);
+        tvHumidity = (TextView) view.findViewById(R.id.detail_humidity_textview);
+        tvMax = (TextView) view.findViewById(R.id.detail_high_textview);
+        tvMin = (TextView) view.findViewById(R.id.detail_low_textview);
+        tvPress = (TextView) view.findViewById(R.id.detail_pressure_textview);
+        tvWind = (TextView) view.findViewById(R.id.detail_wind_textview);
+        ivIcon = (ImageView) view.findViewById(R.id.detail_icon);
+
+        Bundle bundle = getArguments();
+        if(bundle != null) {
+            mUri = bundle.getParcelable(DETAIL_URI);
+        }
+
         return view;
     }
 
@@ -116,17 +128,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(LOG_TAG, "In onCreateLoader");
-        Intent intent = getActivity().getIntent();
-        if (intent == null) {
-            return null;
+        if (mUri != null) {
+            return new CursorLoader(getActivity(),
+                                    mUri,
+                                    FORECAST_COLUMNS,
+                                    null,
+                                    null,
+                                    null);
         }
 
-        return new CursorLoader(getActivity(),
-                                intent.getData(),
-                                FORECAST_COLUMNS,
-                                null,
-                                null,
-                                null);
+        return null;
     }
 
     @Override
@@ -136,8 +147,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             return;
         }
 
-        String dateString = Utility.formatDate(
-                data.getLong(COL_WEATHER_DATE));
+        String dayString = Utility.getDayName(getActivity(), data.getLong(COL_WEATHER_DATE));
+
+        String dateString = Utility.formatDate(data.getLong(COL_WEATHER_DATE));
 
         String weatherDescription =
                 data.getString(COL_WEATHER_DESC);
@@ -164,6 +176,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                                   dateString, weatherDescription, high, low,
                                   humidityString, pressureString, windString);
 
+        tvDay.setText(dayString);
         tvDate.setText(dateString);
         tvDescr.setText(weatherDescription);
         tvMax.setText(high);
@@ -181,5 +194,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+    }
+
+    void onLocationChanged(String newLocation) {
+        // replace the uri, since the location has changed
+        Uri uri = mUri;
+        if (null != uri) {
+            long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
+            mUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(newLocation, date);
+            getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+        }
     }
 }

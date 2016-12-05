@@ -3,7 +3,6 @@ package com.example.lsoco_user.app.sunshine;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,14 +18,23 @@ public class ForecastAdapter extends CursorAdapter {
 
     private final int VIEW_TYPE_TODAY      = 0;
     private final int VIEW_TYPE_FUTURE_DAY = 1;
+    private boolean mUseTodaySpecialLayout;
 
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
+    public void setUseTodaySpecialLayout(boolean useTodaySpecialLayout) {
+        mUseTodaySpecialLayout = useTodaySpecialLayout;
+    }
+
     @Override
     public int getItemViewType(int position) {
-        return (position == 0) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
+        int id = VIEW_TYPE_FUTURE_DAY;
+        if(mUseTodaySpecialLayout && position == 0) {
+            id = VIEW_TYPE_TODAY;
+        }
+        return id;
     }
 
     @Override
