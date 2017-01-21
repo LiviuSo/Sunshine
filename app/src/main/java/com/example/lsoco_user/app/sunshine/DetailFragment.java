@@ -185,6 +185,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         tvPress.setText(pressureString);
         tvWind.setText(windString);
         ivIcon.setImageResource(Utility.getArtResourceForWeatherCondition(weatherId));
+        ivIcon.setContentDescription(weatherDescription);
 
         // If onCreateOptionsMenu has already happened, we need to update the share intent now.
         if (mShareActionProvider != null) {

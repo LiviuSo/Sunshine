@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DetailDayStyle">
+        <item name="android:textSize">24sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="DetailDateStyle">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/grey_detail</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <style name="DetailMaxTempStyle">
+        <item name="android:textSize">96sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="DetailMinTempStyle">
+        <item name="android:textSize">48sp</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">@color/grey_detail</item>
+    </style>
+
+    <style name="DetailCharacteristicStyle">
+        <item name="android:textSize">22sp</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+</resources>

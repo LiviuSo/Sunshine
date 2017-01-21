@@ -71,7 +71,7 @@ public class ForecastAdapter extends CursorAdapter {
 
         boolean isMetric = Utility.isMetric(context);
         tvDate.setText(Utility.getFriendlyDayString(context, Long.parseLong(cursor.getString(ForecastFragment.COL_WEATHER_DATE))));
-        tvForecast.setText(cursor.getString(ForecastFragment.COL_WEATHER_DESC));
+        tvForecast.setText(cursor.getString(ForecastFragment.COL_WEATHER_DESC).trim());
         tvHigh.setText(Utility.formatTemperature(context, Double.parseDouble(cursor.getString(ForecastFragment.COL_WEATHER_MAX_TEMP)), isMetric));
         tvLow.setText(Utility.formatTemperature(context, Double.parseDouble(cursor.getString(ForecastFragment.COL_WEATHER_MIN_TEMP)), isMetric));
 

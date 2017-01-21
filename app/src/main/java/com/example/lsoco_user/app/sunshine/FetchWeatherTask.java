@@ -49,7 +49,7 @@ import java.util.Vector;
 
 public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
-    private final String MyOpenWeatherMapApiKey = "7037c45f7f1708b7dc8c9fd1d2b3d83f";
+    private final String MyOpenWeatherMapApiKey = "78fc098959a0feb86ab7ca2faa0da499";
     private final String LOG_TAG                = FetchWeatherTask.class.getSimpleName();
     private final Context mContext;
 
